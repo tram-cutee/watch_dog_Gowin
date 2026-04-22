@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 `define CLK_PERIOD 37.037
 module tb_uart_frame_parser ();
-
     reg clk;
     reg rst_n;
     reg rx_done = 0;
@@ -16,6 +15,7 @@ module tb_uart_frame_parser ();
     wire rd_en;
     wire [7:0] rd_addr;
     wire wdi_uart;
+
     uart_frame_parser uart_frame_parser_i(
         .clk(clk),
         .rst_n(rst_n),
