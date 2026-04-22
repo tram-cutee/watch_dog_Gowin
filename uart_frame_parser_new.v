@@ -54,7 +54,7 @@ reg [2:0] resp_idx;
 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
-        rx_state <= IDLE;
+        rx_state <= S_IDLE;
     end
     else begin
         rx_state <= rx_next_state;
@@ -292,7 +292,6 @@ always @(*) begin
                     wdi_uart = 0;
                 end
             endcase
-
         end
         default: begin
             wr_en = 0;
