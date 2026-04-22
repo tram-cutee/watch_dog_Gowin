@@ -4,23 +4,35 @@ module tb_uart_frame_parser ();
 
     reg clk;
     reg rst_n;
-/////////// uart rx
     reg rx_done = 0;
     reg [7:0] rx_data_byte =0;
-////////// uart tx
     reg uart_tx_state = 0;
     wire [7:0] tx_data_byte;
     wire send_en;
-////// regfile
     reg [31:0] rd_data;
     wire wr_en;
     wire [7:0] wr_addr;
     wire [31:0] wr_data;
     wire rd_en;
     wire [7:0] rd_addr;
-////////////////// watchdog core
     wire wdi_uart;
-
+    uart_frame_parser uart_frame_parser_i(
+        .clk(clk),
+        .rst_n(rst_n),
+        .rx_done(rx_done),
+        .rx_data_byte(rx_data_byte),
+        .uart_tx_state(uart_tx_state),
+        .tx_data_byte(tx_data_byte),
+        .send_en(send_en),
+        .rd_data(rd_data),
+        .wr_en(wr_en),
+        .wr_addr(wr_addr),
+        .wr_data(wr_data),
+        .rd_en(rd_en),
+        .rd_addr(rd_addr),
+        .wdi_uart(wdi_uart)
+    );
+    
     initial clk = 1'b1;
     always #(`CLK_PERIOD / 2) clk =~clk;
 
@@ -105,4 +117,5 @@ module tb_uart_frame_parser ();
         @(posedge tx_done);
         #(`CLK_PERIOD*50);
     end
+
 endmodule
