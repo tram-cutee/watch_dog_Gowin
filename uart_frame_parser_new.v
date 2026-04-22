@@ -145,82 +145,80 @@ always @(*) begin
     endcase
 end
 
-always @(*) begin
-    case (rx_state)
-        // ── S_IDLE: đợi sync byte 0x55 ──
-        S_IDLE: begin
-            r_cmd = 0;
-            r_addr = 0;
-            r_len = 0;
-            r_data_acc = 0;
-            chk_acc = 0;
-        end
-        
-        // ── S_CMD: nhận CMD byte ──
-        S_CMD: begin
-            r_cmd = rx_data_byte;
-            r_addr = r_addr;
-            r_len = r_len;
-            r_data_acc = r_data_acc;
-            chk_acc = rx_data_byte;
-        end
-        
-        // ── S_ADDR: nhận ADDR byte ──
-        S_ADDR: begin
-            r_cmd = r_cmd;
-            r_addr = rx_data_byte;
-            r_len = r_len;
-            r_data_acc = r_data_acc;
-            chk_acc = chk_acc ^ rx_data_byte;
-        end
-
-        // ── S_LEN: nhận LEN byte ──
-        S_LEN:  begin
-            r_cmd = r_cmd;
-            r_addr = r_addr;
-            r_len = rx_data_byte;
-            r_data_acc = r_data_acc;
-            chk_acc = chk_acc ^ rx_data_byte;
-        end
-
-        // ── S_DATA: nhận LEN bytes data ──
-        S_DATA: begin
-            r_cmd = r_cmd;
-            r_addr = r_addr;
-            r_len = r_len;
-            if(rx_done) begin
-                r_data_acc[r_data_cnt*8 +:8] = rx_data_byte;
-                chk_acc = chk_acc ^ rx_data_byte;
+always @(posedge clk or negedge rst_n) begin
+    if(!rst_n) begin
+        r_cmd <= 0;
+        r_addr <= 0;
+        r_len <= 0;
+        r_data_acc <= 0;
+        chk_acc <= 0;
+    end
+    else begin
+        case (rx_state)
+            S_IDLE: begin
+                r_cmd <= 0;
+                r_addr <= 0;
+                r_len <= 0;
+                r_data_acc <= 0;
+                chk_acc <= 0;
             end
-            else begin
-                r_data_acc = r_data_acc;
+            S_CMD: begin
+                r_cmd       <= rx_data_byte;
+                r_addr      <= r_addr;
+                r_len       <= r_len;
+                r_data_acc  <= r_data_acc;
+                chk_acc     <= rx_data_byte;
             end
-            
-        end
-
-        // ── S_CHK: kiểm tra checksum và thực thi lệnh ──
-        S_CHK: begin
-            r_cmd = r_cmd;
-            r_addr = r_addr;
-            r_len = r_len;
-            r_data_acc = r_data_acc;
-            chk_acc = chk_acc;
-        end
-        S_EXEC: begin
-            r_cmd = r_cmd;
-            r_addr = r_addr;
-            r_len = r_len;
-            r_data_acc = r_data_acc;
-            chk_acc = chk_acc;
-        end
-        default: begin
-            r_cmd = r_cmd;
-            r_addr = r_addr;
-            r_len = r_len;
-            r_data_acc = r_data_acc;
-            chk_acc = chk_acc;
-        end
-    endcase
+            S_ADDR: begin
+                r_cmd       <= r_cmd;
+                r_addr      <= rx_data_byte;
+                r_len       <= r_len;
+                r_data_acc  <= r_data_acc;
+                chk_acc     <= chk_acc ^ rx_data_byte;
+            end
+            S_LEN:  begin
+                r_cmd       <= r_cmd;
+                r_addr      <= r_addr;
+                r_len       <= rx_data_byte;
+                r_data_acc  <= r_data_acc;
+                chk_acc     <= chk_acc ^ rx_data_byte;
+            end
+            S_DATA: begin
+                r_cmd   <= r_cmd;
+                r_addr  <= r_addr;
+                r_len   <= r_len;
+                if(rx_done) begin
+                    r_data_acc[r_data_cnt*8 +:8] <= rx_data_byte;
+                    chk_acc <= chk_acc ^ rx_data_byte;
+                end
+                else begin
+                    r_data_acc <= r_data_acc;
+                end
+                
+            end
+            S_CHK: begin
+                r_cmd       <= r_cmd;
+                r_addr      <= r_addr;
+                r_len       <= r_len;
+                r_data_acc  <= r_data_acc;
+                chk_acc     <= chk_acc;
+            end
+            S_EXEC: begin
+                r_cmd       <= r_cmd;
+                r_addr      <= r_addr;
+                r_len       <= r_len;
+                r_data_acc  <= r_data_acc;
+                chk_acc     <= chk_acc;
+            end
+            default: begin
+                r_cmd       <= r_cmd;
+                r_addr      <= r_addr;
+                r_len       <= r_len;
+                r_data_acc  <= r_data_acc;
+                chk_acc     <= chk_acc;
+            end
+        endcase
+    end
 end
 
 always @(posedge clk or negedge rst_n) begin
@@ -299,6 +297,7 @@ always @(*) begin
             wr_data = 0;
             rd_en = 0;
             rd_addr = 0;
+            wdi_uart = 0;
         end
     endcase
 end
