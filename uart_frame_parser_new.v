@@ -131,7 +131,7 @@ always @(*) begin
                 if(rx_data_byte == chk_acc) begin
                     rx_next_state = S_EXEC;
                 end else begin
-                    rx_next_state = IDLE;
+                    rx_next_state = S_IDLE;
                 end
             end
             else begin
@@ -139,7 +139,7 @@ always @(*) begin
             end
         end
         S_EXEC: begin
-            rx_next_state = IDLE;
+            rx_next_state = S_IDLE;
         end
         default: rx_next_state = S_IDLE;
     endcase
@@ -189,7 +189,7 @@ always @(*) begin
             r_addr = r_addr;
             r_len = r_len;
             if(rx_done) begin
-                r_data_acc[(r_data_cnt+1)*8 - 1:r_data_cnt*8] = rx_data_byte;
+                r_data_acc[r_data_cnt*8 +:8] = rx_data_byte;
                 chk_acc = chk_acc ^ rx_data_byte;
             end
             else begin
