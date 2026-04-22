@@ -39,7 +39,7 @@ module tb_uart_frame_parser ();
     initial begin
         rst_n = 1'b0;
         rx_data_byte = 8'd0;
-        send_en = 1'd0;
+        rx_done = 1'd0;
 
         #(`CLK_PERIOD*20 + 1 );
         rst_n = 1'b1;
@@ -47,74 +47,65 @@ module tb_uart_frame_parser ();
 
         //Byte 1: 0x55
         rx_data_byte = 8'h55;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
         //Byte 2: 0x01
         rx_data_byte = 8'h01;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
         //Byte 3: 0x04
         rx_data_byte = 8'h04;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
         //Byte 4: 0x04
         rx_data_byte = 8'h04;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
         //Byte 4: 0xd0
         rx_data_byte = 8'hd0;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
         //Byte 5: 0xd0
         rx_data_byte = 8'h07;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
          //Byte 6: 0xd0
         rx_data_byte = 8'h00;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
          //Byte 7: 0xd0
         rx_data_byte = 8'h00;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
 
          //Byte 8: 0xd0
         rx_data_byte = 8'hd2;
-        send_en = 1'd1;
+        rx_done = 1'd1;
         #`CLK_PERIOD;
-        send_en = 1'd0;
-        @(posedge tx_done);
+        rx_done = 1'd0;
         #(`CLK_PERIOD*50);
     end
 
