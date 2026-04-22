@@ -38,7 +38,7 @@ module tb_uart_frame_parser ();
 
     initial begin
         rst_n = 1'b0;
-        data_byte_tx = 8'd0;
+        rx_data_byte = 8'd0;
         send_en = 1'd0;
 
         #(`CLK_PERIOD*20 + 1 );
@@ -46,7 +46,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
         //Byte 1: 0x55
-        data_byte_tx = 8'h55;
+        rx_data_byte = 8'h55;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -54,7 +54,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
         //Byte 2: 0x01
-        data_byte_tx = 8'h01;
+        rx_data_byte = 8'h01;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -62,7 +62,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
         //Byte 3: 0x04
-        data_byte_tx = 8'h04;
+        rx_data_byte = 8'h04;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -70,7 +70,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
         //Byte 4: 0x04
-        data_byte_tx = 8'h04;
+        rx_data_byte = 8'h04;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -78,7 +78,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
         //Byte 4: 0xd0
-        data_byte_tx = 8'hd0;
+        rx_data_byte = 8'hd0;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -86,7 +86,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
         //Byte 5: 0xd0
-        data_byte_tx = 8'h07;
+        rx_data_byte = 8'h07;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -94,7 +94,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
          //Byte 6: 0xd0
-        data_byte_tx = 8'h00;
+        rx_data_byte = 8'h00;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -102,7 +102,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
          //Byte 7: 0xd0
-        data_byte_tx = 8'h00;
+        rx_data_byte = 8'h00;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
@@ -110,7 +110,7 @@ module tb_uart_frame_parser ();
         #(`CLK_PERIOD*50);
 
          //Byte 8: 0xd0
-        data_byte_tx = 8'hd2;
+        rx_data_byte = 8'hd2;
         send_en = 1'd1;
         #`CLK_PERIOD;
         send_en = 1'd0;
