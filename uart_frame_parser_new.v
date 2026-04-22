@@ -226,6 +226,9 @@ always @(posedge clk or negedge rst_n) begin
         r_data_cnt <= 0;
     end else begin
         case (rx_state)
+            S_IDLE: begin
+                r_data_cnt <= 0;
+            end
             S_DATA: begin
                 if(rx_done) begin
                     r_data_cnt <= r_data_cnt + 1;
