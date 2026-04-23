@@ -1,4 +1,4 @@
- module uart_frame_parser (
+ module uart_frame_parser_new (
     input clk,
     input rst_n,
 /////////// uart rx
@@ -52,98 +52,183 @@ reg [7:0] resp_buf [0:5];  // Buffer chứa bytes cần gửi về PC, Tối đa
 reg [2:0] resp_len;
 reg [2:0] resp_idx;
 
+// always @(posedge clk or negedge rst_n) begin
+//     if(!rst_n) begin
+//         rx_state <= S_IDLE;
+//     end
+//     else begin
+//         rx_state <= rx_next_state;
+//     end
+// end
+
+/*
+ FSM controll
+*/
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         rx_state <= S_IDLE;
     end
     else begin
-        rx_state <= rx_next_state;
-    end
-end
-
-/*
- FSM controll
-*/
-always @(*) begin
-    case (rx_state)
+        case (rx_state)
         // ── S_IDLE: đợi sync byte 0x55 ──
         S_IDLE: begin
             if(rx_done) begin
                 if(rx_data_byte == 8'h55) begin
-                    rx_next_state = S_CMD;
+                    rx_state <= S_CMD;
                 end else begin
-                    rx_next_state = S_IDLE;   // khác 0x55 => ở lại
+                    rx_state <= S_IDLE;   // khác 0x55 => ở lại
                 end
             end
             else begin
-                rx_next_state = S_IDLE;      // chưa có byte => ở lại
+                rx_state <= S_IDLE;      // chưa có byte => ở lại
             end
         end
         // ── S_CMD: nhận CMD byte ──
         S_CMD: begin
             if(rx_done) begin
-                rx_next_state = S_ADDR;
+                rx_state <= S_ADDR;
             end
             else begin
-                rx_next_state = S_CMD;
+                rx_state <= S_CMD;
             end
         end
         // ── S_ADDR: nhận ADDR byte ──
         S_ADDR: begin
             if(rx_done) begin
-                rx_next_state = S_LEN; 
+                rx_state <= S_LEN; 
             end
             else begin
-                rx_next_state = S_ADDR;
+                rx_state <= S_ADDR;
             end
         end
         // ── S_LEN: nhận LEN byte ──
         S_LEN:  begin
             if(rx_done) begin
                 if(rx_data_byte == 8'h00) begin
-                    rx_next_state = S_CHK;   // len = 0 => không có data
+                    rx_state <= S_CHK;   // len = 0 => không có data
                 end
                 else begin
-                    rx_next_state = S_DATA;  // len > 0 => nhận data
+                    rx_state <= S_DATA;  // len > 0 => nhận data
                 end
             end
             else begin
-                rx_next_state = S_LEN;      // chưa có byte => ở lại
+                rx_state <= S_LEN;      // chưa có byte => ở lại
             end
         end
         // ── S_DATA: nhận LEN bytes data ──
         S_DATA: begin
             if(rx_done) begin
-                if(r_data_cnt + 1 >= r_len) begin
-                    rx_next_state = S_CHK;  // đủ LEN bytes => sang CHK
+                if(r_data_cnt == r_len - 1) begin
+                    rx_state <= S_CHK;  // đủ LEN bytes => sang CHK
                 end
                 else begin
-                    rx_next_state = S_DATA; // chưa đủ => ở lại
+                    rx_state <= S_DATA; // chưa đủ => ở lại
                 end
             end
             else begin
-                rx_next_state = S_DATA;    // chưa có byte => ở lại
+                rx_state <= S_DATA;    // chưa có byte => ở lại
             end
         end
         // ── S_CHK: kiểm tra checksum và thực thi lệnh ──
         S_CHK: begin
             if(rx_done) begin
                 if(rx_data_byte == chk_acc) begin
-                    rx_next_state = S_EXEC;
+                    rx_state <= S_EXEC;
                 end else begin
-                    rx_next_state = S_IDLE;
+                    rx_state <= S_IDLE;
                 end
             end
             else begin
-                rx_next_state = S_CHK;
+                rx_state <= S_CHK;
             end
         end
         S_EXEC: begin
-            rx_next_state = S_IDLE;
+            rx_state <= S_IDLE;
         end
-        default: rx_next_state = S_IDLE;
+        default: rx_state <= S_IDLE;
     endcase
+    end
 end
+// always @(*) begin
+//     case (rx_state)
+//         // ── S_IDLE: đợi sync byte 0x55 ──
+//         S_IDLE: begin
+//             if(rx_done) begin
+//                 if(rx_data_byte == 8'h55) begin
+//                     rx_next_state = S_CMD;
+//                 end else begin
+//                     rx_next_state = S_IDLE;   // khác 0x55 => ở lại
+//                 end
+//             end
+//             else begin
+//                 rx_next_state = S_IDLE;      // chưa có byte => ở lại
+//             end
+//         end
+//         // ── S_CMD: nhận CMD byte ──
+//         S_CMD: begin
+//             if(rx_done) begin
+//                 rx_next_state = S_ADDR;
+//             end
+//             else begin
+//                 rx_next_state = S_CMD;
+//             end
+//         end
+//         // ── S_ADDR: nhận ADDR byte ──
+//         S_ADDR: begin
+//             if(rx_done) begin
+//                 rx_next_state = S_LEN; 
+//             end
+//             else begin
+//                 rx_next_state = S_ADDR;
+//             end
+//         end
+//         // ── S_LEN: nhận LEN byte ──
+//         S_LEN:  begin
+//             if(rx_done) begin
+//                 if(rx_data_byte == 8'h00) begin
+//                     rx_next_state = S_CHK;   // len = 0 => không có data
+//                 end
+//                 else begin
+//                     rx_next_state = S_DATA;  // len > 0 => nhận data
+//                 end
+//             end
+//             else begin
+//                 rx_next_state = S_LEN;      // chưa có byte => ở lại
+//             end
+//         end
+//         // ── S_DATA: nhận LEN bytes data ──
+//         S_DATA: begin
+//             if(rx_done) begin
+//                 if(r_data_cnt + 1 >= r_len) begin
+//                     rx_next_state = S_CHK;  // đủ LEN bytes => sang CHK
+//                 end
+//                 else begin
+//                     rx_next_state = S_DATA; // chưa đủ => ở lại
+//                 end
+//             end
+//             else begin
+//                 rx_next_state = S_DATA;    // chưa có byte => ở lại
+//             end
+//         end
+//         // ── S_CHK: kiểm tra checksum và thực thi lệnh ──
+//         S_CHK: begin
+//             if(rx_done) begin
+//                 if(rx_data_byte == chk_acc) begin
+//                     rx_next_state = S_EXEC;
+//                 end else begin
+//                     rx_next_state = S_IDLE;
+//                 end
+//             end
+//             else begin
+//                 rx_next_state = S_CHK;
+//             end
+//         end
+//         S_EXEC: begin
+//             rx_next_state = S_IDLE;
+//         end
+//         default: rx_next_state = S_IDLE;
+//     endcase
+// end
 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
@@ -163,25 +248,49 @@ always @(posedge clk or negedge rst_n) begin
                 chk_acc <= 0;
             end
             S_CMD: begin
-                r_cmd       <= rx_data_byte;
-                r_addr      <= r_addr;
-                r_len       <= r_len;
-                r_data_acc  <= r_data_acc;
-                chk_acc     <= rx_data_byte;
+                if(rx_done) begin
+                    r_cmd       <= rx_data_byte;
+                    chk_acc     <= rx_data_byte;
+                end
+                else begin
+                    r_cmd       <= 0;
+                    chk_acc     <= chk_acc;
+                end
+                //r_cmd       <= rx_data_byte;
+                r_addr      <= 0;
+                r_len       <= 0;
+                r_data_acc  <= 0;
+                //chk_acc     <= r_cmd;
             end
             S_ADDR: begin
+                if(rx_done) begin
+                    r_addr       <= rx_data_byte;
+                    chk_acc     <= chk_acc ^ rx_data_byte;
+                end
+                else begin
+                    r_addr       <= 0;
+                    chk_acc     <= chk_acc;
+                end
                 r_cmd       <= r_cmd;
-                r_addr      <= rx_data_byte;
+                //r_addr      <= rx_data_byte;
                 r_len       <= r_len;
                 r_data_acc  <= r_data_acc;
-                chk_acc     <= chk_acc ^ rx_data_byte;
+                //chk_acc     <= chk_acc ^ rx_data_byte;
             end
             S_LEN:  begin
+                if(rx_done) begin
+                    r_len       <= rx_data_byte;
+                    chk_acc     <= chk_acc ^ rx_data_byte;
+                end
+                else begin
+                    r_len       <= 0;
+                    chk_acc     <= chk_acc;
+                end
                 r_cmd       <= r_cmd;
                 r_addr      <= r_addr;
-                r_len       <= rx_data_byte;
+                //r_len       <= rx_data_byte;
                 r_data_acc  <= r_data_acc;
-                chk_acc     <= chk_acc ^ rx_data_byte;
+                //chk_acc     <= chk_acc ^ rx_data_byte;
             end
             S_DATA: begin
                 r_cmd   <= r_cmd;
@@ -193,6 +302,7 @@ always @(posedge clk or negedge rst_n) begin
                 end
                 else begin
                     r_data_acc <= r_data_acc;
+                    chk_acc <= chk_acc;
                 end
                 
             end
@@ -232,7 +342,7 @@ always @(posedge clk or negedge rst_n) begin
             S_DATA: begin
                 if(rx_done) begin
                     r_data_cnt <= r_data_cnt + 1;
-                    if(r_data_cnt == r_len) begin
+                    if(r_data_cnt == r_len - 1) begin
                         r_data_cnt <= 0;
                     end
                 end
