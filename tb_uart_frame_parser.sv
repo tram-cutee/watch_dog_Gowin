@@ -5,9 +5,11 @@ module tb_uart_frame_parser ();
     reg rst_n;
     reg rx_done = 0;
     reg [7:0] rx_data_byte =0;
-    reg uart_tx_state = 0;
+
+    reg tx_done = 1;
     wire [7:0] tx_data_byte;
     wire send_en;
+
     reg [31:0] rd_data;
     wire wr_en;
     wire [7:0] wr_addr;
@@ -16,12 +18,12 @@ module tb_uart_frame_parser ();
     wire [7:0] rd_addr;
     wire wdi_uart;
 
-    uart_frame_parser_new uart_frame_parser_new_i(
+    uart_frame_top uart_frame_top_i(
         .clk(clk),
         .rst_n(rst_n),
         .rx_done(rx_done),
         .rx_data_byte(rx_data_byte),
-        .uart_tx_state(uart_tx_state),
+        .tx_done(tx_done),
         .tx_data_byte(tx_data_byte),
         .send_en(send_en),
         .rd_data(rd_data),
@@ -103,6 +105,22 @@ module tb_uart_frame_parser ();
     send_byte(8'h03);  // CHK
     #(`CLK_PERIOD*50);
     $finish;
+end
+
+
+initial begin
+    @(posedge rd_en);
+    #(`CLK_PERIOD);
+    rd_data = 32'hCAFECAFE;
+    @(posedge rd_en);
+    #(`CLK_PERIOD);
+    rd_data = 32'h11111111;
+    @(posedge rd_en);
+    #(`CLK_PERIOD);
+    rd_data = 32'h22222222;
+    @(posedge rd_en);
+    #(`CLK_PERIOD);
+    rd_data = 32'h33333333;
 end
 
 endmodule
